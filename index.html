@@ -2,8 +2,15 @@
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>ResqPedi®</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ResqPedi">
+    
+    <link rel="apple-touch-icon" href="icon.png">
+
     <style>
         :root {
             --bg: #ffffff;
@@ -22,7 +29,10 @@
             --triage-green: #4cd964;
             --triage-black: #1c1c1e;
             
+            /* Jemné podbarvení pro zebra striping */
             --zebra: rgba(0, 0, 0, 0.03);
+            /* Dynamický padding pro iPhone notch */
+            --safe-top: env(safe-area-inset-top);
         }
 
         .dark-mode {
@@ -49,6 +59,8 @@
             flex-direction: column;
             overflow: hidden;
             transition: background-color 0.3s ease;
+            /* Respektuje horní výřez iPhonu v režimu na šířku i výšku */
+            padding-top: var(--safe-top);
         }
 
         header {
@@ -63,7 +75,6 @@
 
         .app-title { font-weight: 900; font-size: 1.4rem; letter-spacing: -0.8px; }
         .trademark { font-size: 0.6rem; vertical-align: top; margin-left: 2px; color: var(--text-muted); }
-        .menu-icon, .theme-icon { font-size: 1.5rem; cursor: pointer; padding: 5px; }
 
         /* --- DRAWER --- */
         .drawer {
@@ -71,6 +82,7 @@
             background: var(--card); box-shadow: 5px 0 20px rgba(0,0,0,0.3);
             transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 300; padding: 25px;
             display: flex; flex-direction: column;
+            padding-top: calc(var(--safe-top) + 20px);
         }
         .drawer.open { left: 0; }
         .drawer-overlay {
@@ -107,7 +119,7 @@
             border: 1px solid var(--border); color: var(--text-main); font-size: 0.9rem; font-family: inherit;
         }
 
-        /* --- PATIENT GRID (Protected Units) --- */
+        /* --- PATIENT GRID --- */
         .patient-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
         .info-box {
             background: var(--surface); border-radius: 20px; padding: 15px;
@@ -139,28 +151,23 @@
             -webkit-appearance: none; width: 36px; height: 36px; background: #fff; border: 4px solid #444; border-radius: 50%;
         }
 
-        /* --- CONTENT --- */
+        /* --- DATA CARD & ZEBRA --- */
         .data-card { flex: 1; background: var(--card); border-top: 1px solid var(--border); border-radius: 35px 35px 0 0; display: flex; flex-direction: column; overflow: hidden; }
         .tab-nav { display: flex; background: var(--surface); padding: 6px; gap: 4px; overflow-x: auto; scrollbar-width: none; }
-        .tab-item { flex: 1; min-width: 75px; padding: 14px 0; border: none; background: none; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); border-radius: 14px; }
+        .tab-item { flex: 1; min-width: 75px; padding: 14px 0; border: none; background: none; font-size: 0.65rem; font-weight: 800; color: var(--text-muted); border-radius: 14px; }
         .tab-item.active { background: var(--card); color: var(--primary); }
 
         .tab-content { padding: 10px 0; overflow-y: auto; flex: 1; }
         .section-header { font-size: 0.75rem; font-weight: 900; color: var(--accent); text-transform: uppercase; margin: 15px 20px 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
         
-        .list-row { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 12px 20px; border-bottom: 1px solid var(--surface); 
-        }
-        
-        /* Zebra Striping */
+        /* Zebra podbarvení */
+        .list-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--surface); }
         .list-row:nth-child(even) { background: var(--zebra); }
 
         .list-label { font-size: 1rem; font-weight: 500; color: var(--text-main); }
         .list-val-wrapper { display: flex; align-items: baseline; gap: 4px; }
         .list-val { font-size: 1.15rem; font-weight: 900; color: var(--primary); }
         .list-unit-fixed { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); }
-
         .drug-sub-label { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); display: block; margin-top: -2px; }
     </style>
 </head>
@@ -183,9 +190,9 @@
     </div>
 
     <header>
-        <div class="menu-icon" onclick="toggleMenu()">☰</div>
+        <div style="font-size: 1.5rem; cursor: pointer; padding: 5px;" onclick="toggleMenu()">☰</div>
         <div class="app-title">ResqPedi<span class="trademark">®</span></div>
-        <div class="theme-icon" onclick="document.body.classList.toggle('dark-mode')">🌓</div>
+        <div style="font-size: 1.5rem; cursor: pointer; padding: 5px;" onclick="document.body.classList.toggle('dark-mode')">🌓</div>
     </header>
 
     <div class="patient-grid">
@@ -212,11 +219,11 @@
 
     <div class="data-card">
         <div class="tab-nav">
-            <button class="tab-item active" onclick="setTab(this, 'NORM')">FYZIOLOGICKÉ HODNOTY</button>
+            <button class="tab-item active" onclick="setTab(this, 'NORM')">FYZIOLOGIE</button>
             <button class="tab-item" onclick="setTab(this, 'EQUIP')">VYBAVENÍ</button>
             <button class="tab-item" onclick="setTab(this, 'RES')">KPR</button>
             <button class="tab-item" onclick="setTab(this, 'ANE')">ANESTEZIE</button>
-            <button class="tab-item" onclick="setTab(this, 'EMGY')">AKUTNÍ STAVY</button>
+            <button class="tab-item" onclick="setTab(this, 'EMGY')">AKUTNÍ</button>
         </div>
         <div class="tab-content" id="data-view"></div>
     </div>
@@ -242,9 +249,7 @@
         "Suxameth.": { dose: 2, unit: "mg", sub: "RSI" },
         "Ketamin (Analgezie)": { dose: 0.5, unit: "mg", sub: "0.25-0.5 mg/kg" },
         "Ketamin (Sedace)": { dose: 1.0, unit: "mg", sub: "1 mg/kg" },
-        "Ketamin (Anestezie)": { dose: 2.0, unit: "mg", sub: "2 mg/kg" },
-        "Testovací lék (TEST)": { dose: 3.5, unit: "mg", sub: "tuna na kilo" },
-       
+        "Ketamin (Anestezie)": { dose: 2.0, unit: "mg", sub: "2 mg/kg" }
     };
 
     let activeTab = 'NORM', curB = "PURPLE";
@@ -294,7 +299,7 @@
         content.innerHTML = `<div class="triage-step-title">${step.q}</div><div class="triage-btns">${btns}</div>`;
     }
 
-    // --- GCS / APGAR ---
+    // --- GCS ---
     function openGCS() {
         toggleMenu(); document.getElementById('tool-modal').classList.add('active');
         document.getElementById('overlay').style.display = 'block';
@@ -313,6 +318,8 @@
         else { c="var(--triage-green)"; txt="NORMA / LEHKÁ PORUCHA"; }
         const r = document.getElementById('gr'); r.innerHTML = `${s} BODŮ <span class="result-label">${txt}</span>`; r.style.background = c;
     }
+
+    // --- APGAR ---
     function openApgar() {
         toggleMenu(); document.getElementById('tool-modal').classList.add('active');
         document.getElementById('overlay').style.display = 'block';
@@ -373,24 +380,15 @@
     function render() {
         const view = document.getElementById('data-view'), kg = parseFloat(document.getElementById('in-kg').value)||0, yrs = parseInt(document.getElementById('in-yr').value)||0, d = FULL_DB[curB];
         if(activeTab === 'NORM') {
-            view.innerHTML = `<div class="section-header">Fyziologické hodnoty</div>${row("Tepová frekvence (Tf)", yrs<1?'110-160':yrs<5?'90-140':'70-120', "/min")}${row("TK systol. (sTK)", Math.round(70+(yrs*2)), "mmHg")}${row("Dechová frekvence (Df)", yrs<1?'30-40':yrs<5?'20-30':'15-20', "/min")}`;        
+            view.innerHTML = `<div class="section-header">Fyziologie</div>${row("Tep (Tf)", yrs<1?'110-160':yrs<5?'90-140':'70-120', "/min")}${row("sTK (systol)", Math.round(70+(yrs*2)), "mmHg")}${row("Dech (Df)", yrs<1?'30-40':yrs<5?'20-30':'15-20', "/min")}`;        
         } else if(activeTab === 'EQUIP') {
-            view.innerHTML = `
-                <div class="section-header">A (Airways) - Průchodnost DC</div>
-                ${row("OPA (ústní vzduchovod)", d.opa, "")}
-                ${row("LMA (laryngeální maska)", "vel. " + d.lma, "")}
-                <div class="section-header">B (Breathing) - Dýchání</div>
-                ${row("ET rourka (ID)", d.etk, "mm")}
-                ${row("Odsávací kanyla", d.suction, "")}
-                <div class="section-header">C (Circulation) - Krevní oběh</div>
-                ${row("I.V. kanyla", d.cannula, "")}
-                ${row("I.O. jehla", d.io, "")}`;
+            view.innerHTML = `<div class="section-header">DC / Airway</div>${row("OPA", d.opa, "")}${row("LMA", "vel. " + d.lma, "")}<div class="section-header">B / Breathing</div>${row("ET rourka", d.etk, "mm")}${row("Odsávačka", d.suction, "")}<div class="section-header">C / Circulation</div>${row("I.V. kanyla", d.cannula, "")}${row("I.O. jehla", d.io, "")}`;
         } else if(activeTab === 'RES') {
-            view.innerHTML = `<div class="section-header">Resuscitace (KPR)</div>${row("Adrenalin (1:10k)", (kg*0.1).toFixed(1), "ml")}${row("Defibrilace (4J/kg)", (kg*4).toFixed(0), "J")}${row("Bolus tekutin (20ml/kg)", (kg*20).toFixed(0), "ml")}`;
+            view.innerHTML = `<div class="section-header">KPR</div>${row("Adrenalin (1:10k)", (kg*0.1).toFixed(1), "ml")}${row("Defibrilace (4J)", (kg*4).toFixed(0), "J")}${row("Bolus (20ml/kg)", (kg*20).toFixed(0), "ml")}`;
         } else if(activeTab === 'ANE') {
-            view.innerHTML = `<div class="section-header">Anestezie / Úvod</div>${drug("Propofol", kg)}${drug("Suxameth.", kg)}${drug("Ketamin (Analgezie)", kg)}${drug("Ketamin (Sedace)", kg)}${drug("Ketamin (Anestezie)", kg)}${drug("Testovací lék (TEST)", kg)}`;
+            view.innerHTML = `<div class="section-header">Anestezie</div>${drug("Propofol", kg)}${drug("Suxameth.", kg)}${drug("Ketamin (Sedace)", kg)}${drug("Ketamin (Anestezie)", kg)}`;
         } else if(activeTab === 'EMGY') {
-            view.innerHTML = `<div class="section-header">Akutní stavy / Léky</div>${drug("Diazepam p.r.", kg)}${drug("Midazolam i.m.", kg)}${drug("Glukóza 10%", kg)}`;
+            view.innerHTML = `<div class="section-header">Akutní stavy</div>${drug("Diazepam p.r.", kg)}${drug("Midazolam i.m.", kg)}${drug("Glukóza 10%", kg)}`;
         }
     }
     syncFromSlider(12);
