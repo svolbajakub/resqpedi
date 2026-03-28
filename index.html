@@ -219,45 +219,61 @@
 
     <div class="data-card">
         <div class="tab-nav">
-            <button class="tab-item active" onclick="setTab(this, 'NORM')">FYZIOLOGIE</button>
+            <button class="tab-item active" onclick="setTab(this, 'NORM')">FYZIOLOGICKÉ <br> HODNOTY</button>
             <button class="tab-item" onclick="setTab(this, 'EQUIP')">VYBAVENÍ</button>
             <button class="tab-item" onclick="setTab(this, 'RES')">KPR</button>
             <button class="tab-item" onclick="setTab(this, 'ANE')">ANESTEZIE</button>
-            <button class="tab-item" onclick="setTab(this, 'EMGY')">AKUTNÍ</button>
+            <button class="tab-item" onclick="setTab(this, 'EMGY')">AKUTNÍ <br> STAVY</button>
         </div>
         <div class="tab-content" id="data-view"></div>
     </div>
 
 <script>
     const FULL_DB = {
-        "GREY":   { etk: "3.0", suction: "sv. zelená (6Fr)", opa: "růžový (00)", lma: "1", cannula: "24G (žlutá)", io: "15mm (růžová)" },
-        "PINK":   { etk: "3.5", suction: "modrá (8Fr)", opa: "černý (0)", lma: "1", cannula: "24G (žlutá)", io: "15mm (růžová)" },
-        "RED":    { etk: "3.5-4.0", suction: "modrá (8Fr)", opa: "bílý (1)", lma: "1.5", cannula: "22G (modrá)", io: "15mm (růžová)" },
-        "PURPLE": { etk: "4.0-4.5", suction: "modrá (8Fr)", opa: "bílý (1)", lma: "1.5", cannula: "22G (modrá)", io: "15mm (růžová)" },
-        "YELLOW": { etk: "4.5-5.0", suction: "černá (10Fr)", opa: "zelený (2)", lma: "2", cannula: "22G (modrá)", io: "25mm (modrá)" },
-        "WHITE":  { etk: "5.0-5.5", suction: "černá (10Fr)", opa: "zelený (2)", lma: "2", cannula: "20G (růžová)", io: "25mm (modrá)" },
-        "BLUE":   { etk: "5.5-6.0", suction: "bílá (12Fr)", opa: "oranžový (3)", lma: "2.5", cannula: "20G (růžová)", io: "25mm (modrá)" },
-        "ORANGE": { etk: "6.0", suction: "bílá (12Fr)", opa: "oranžový (3)", lma: "2.5", cannula: "20G (růžová)", io: "25mm (modrá)" },
-        "GREEN":  { etk: "6.5", suction: "tm. zelená (14Fr)", opa: "červený (4)", lma: "3", cannula: "20G (růžová)", io: "25mm (modrá)" }
+        "GREY":   { etk: "3.0", depth: "9", suction: "6 (světle zelená)", opa: "00 (růž.)", lma: "1", blade: "0 (Miller)", cannula: "24G (žlutá)", io: "15mm (růžová)" },
+        "PINK":   { etk: "3.5", depth: "10", suction: "8 (modrá)", opa: "0 (čer.)", lma: "1", blade: "0-1 (Miller)", cannula: "24G (žlutá)", io: "15mm (růžová)" },
+        "RED":    { etk: "3.5-4.0", depth: "11", suction: "8 (modrá)", opa: "1 (bílý)", lma: "1.5", blade: "1 (Miller)", cannula: "22G (modrá)", io: "15mm (růžová)" },
+        "PURPLE": { etk: "4.0-4.5", depth: "12", suction: "8 (modrá)", opa: "1 (bílý)", lma: "1.5", blade: "1 (Miller)", cannula: "22G (modrá)", io: "15mm (růžová)" },
+        "YELLOW": { etk: "4.5-5.0", depth: "13", suction: "10 (černá)", opa: "2 (zel.)", lma: "2", blade: "2 (Mac)", cannula: "22G (modrá)", io: "25mm (modrá)" },
+        "WHITE":  { etk: "5.0-5.5", depth: "14", suction: "10 (černá)", opa: "2 (zel.)", lma: "2", blade: "2 (Mac)", cannula: "20G (růžová)", io: "25mm (modrá)" },
+        "BLUE":   { etk: "5.5-6.0", depth: "15", suction: "12 (bílá)", opa: "3 (oran.)", lma: "2.5", blade: "2 (Mac)", cannula: "20G (růžová)", io: "25mm (modrá)" },
+        "ORANGE": { etk: "6.0", depth: "16", suction: "12 (bílá)", opa: "3 (oran.)", lma: "2.5", blade: "3 (Mac)", cannula: "20G (růžová)", io: "25mm (modrá)" },
+        "GREEN":  { etk: "6.5", depth: "18", suction: "14 (tmavě zelená)", opa: "4 (červ.)", lma: "3", blade: "3 (Mac)", cannula: "20G (růžová)", io: "25mm (modrá)" }
     };
 
     const DRUGS = [
-        { name: "Diazepam p.r.", dose: 0.5, unit: "mg", sub: "Křečové stavy", tab: "EMGY" },
-        { name: "Midazolam i.m.", dose: 0.2, unit: "mg", sub: "Křečové stavy", tab: "EMGY" },
-        { name: "Glukóza 10%", dose: 5, unit: "ml", sub: "Hypoglykémie", tab: "EMGY" },
-        { name: "Propofol", dose: 3, unit: "mg", sub: "3mg/kg; Úvod do CA", tab: "ANE" },
-        { name: "Suxamethonium", dose: 2, unit: "mg", sub: "2mg/kg; RSI", tab: "ANE" },
+        // ANESTEZIE
+        { name: "Propofol", dose: 3, unit: "mg", sub: "Úvod do CA (i.v.)", tab: "ANE" },
+        { name: "Etomidát", dose: 0.3, unit: "mg", sub: "Kardiostabilní úvod (i.v.)", tab: "ANE" },
+        { name: "Thiopental", dose: 5, unit: "mg", sub: "Úvod do CA (i.v.)", tab: "ANE" },
+        { name: "Rocuronium", dose: 1, unit: "mg", sub: "Relaxace (i.v.)", tab: "ANE" },
+        { name: "Suxamethonium", dose: 2, unit: "mg", sub: "RSI (i.v.)", tab: "ANE" },
+        { name: "Atropin", dose: 0.02, unit: "mg", sub: "Premedikace (i.v.)", tab: ["ANE", "RES"] },
+        { name: "Sufentanil", dose: 0.0002, unit: "mg", sub: "0.2 µg/kg (i.v.)", tab: "ANE" },
+        
+        // AKUTNÍ STAVY
+        { name: "Adrenalin (i.m.)", dose: 0.01, unit: "mg", sub: "Anafylaxe", tab: "EMGY" },
+        { name: "Dexamethason (i.v./i.m.)", dose: 0.6, unit: "mg", sub: "Laryngitida", tab: "EMGY" },
+        { name: "Adenosin (i.v.)", dose: 0.1, unit: "mg", sub: "SVT (rapidní i.v. podání)", tab: "EMGY" },
+        { name: "Diazepam (p.r.)", dose: 0.5, unit: "mg", sub: "Křečové stavy", tab: "EMGY" },
+        { name: "Midazolam (i.m.)", dose: 0.2, unit: "mg", sub: "Křeče", tab: "EMGY" },
+        { name: "Glukóza 10% (i.v.)", dose: 5, unit: "ml", sub: "Hypoglykémie", tab: "EMGY" },
+        { name: "Naloxon(i.v./i.m.)", dose: 0.01, unit: "mg", sub: "Antidotum opioidů ", tab: "EMGY" },
+        { name: "Flumazenil (i.v.)", dose: 0.01, unit: "mg", sub: "Antidotum benzodiazepinů", tab: "EMGY" },
+        
+        // KETAMIN
         { 
             id: "drug_ketamin",
-            name: "KETAMIN (Calypsol)", 
+            name: "Calypsol", 
             tab: ["ANE", "EMGY"], 
             sub: "Rozbalit pro cesty a dávky ▼",
             variants: [
-                { l: "Analgezie (i.v.)", d: 0.5 },
+                { l: "Analgezie (i.v.)", d: 0.3, dMax: 0.5 },
                 { l: "Sedace (i.v.)", d: 1.0 },
                 { l: "Anestezie (i.v.)", d: 2.0 },
-                { l: "i.m. podání", d: 5.0 },
-                { l: "p.r. / Nasálně", d: 3.0 }
+                { l: "Analgezie (i.m.)", d: 0.5 },
+                { l: "Sedace (i.m.)", d: 1.0 },
+                { l: "Anestezie (i.m.)", d: 2.0 },
             ]
         }
     ];
@@ -278,26 +294,11 @@
         document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active')); 
         btn.classList.add('active'); activeTab = name; render(); 
     }
-
     function toggleVariants(id) {
-        if (expandedIds.has(id)) {
-            expandedIds.delete(id);
-        } else {
-            expandedIds.add(id);
-        }
+        if (expandedIds.has(id)) expandedIds.delete(id); else expandedIds.add(id);
         render(); 
     }
 
-    // --- TRIAGE, GCS, APGAR ---
-    const jSteps = { walk: { q: "Může dítě chodit?", btns: [{l:"Ano", s:"result-green"}, {l:"Ne", s:"breath"}] }, breath: { q: "Dýchá dítě?", btns: [{l:"Ano", s:"rate"}, {l:"Ne", s:"airway"}] }, airway: { q: "Po uvolnění cest dýchá?", btns: [{l:"Ano", s:"result-red"}, {l:"Ne", s:"pulse"}] }, pulse: { q: "Má hmatný puls?", btns: [{l:"Ano", s:"rescue"}, {l:"Ne", s:"result-black"}] }, rescue: { q: "Dýchá po 5 vdeších?", btns: [{l:"Ano", s:"result-red"}, {l:"Ne", s:"result-black"}] }, rate: { q: "Dechová frekvence?", btns: [{l:"< 15 nebo > 45", s:"result-red"}, {l:"15 - 45 /min", s:"pulseCheck"}] }, pulseCheck: { q: "Hmatný puls?", btns: [{l:"Ne", s:"result-red"}, {l:"Ano", s:"avpu"}] }, avpu: { q: "Reakce (AVPU)?", btns: [{l:"P nebo U", s:"result-red"}, {l:"A nebo V", s:"result-yellow"}] } };
-    function startJumpstart() { toggleMenu(); document.getElementById('tool-modal').classList.add('active'); document.getElementById('overlay').style.display = 'block'; showJumpStep('walk'); }
-    function showJumpStep(id) { const content = document.getElementById('modal-content'); if(id.startsWith('result')) { const color = id.split('-')[1]; const labels = { green: 'LEHKÉ', red: 'KRITICKÉ', black: 'MRTVÉ', yellow: 'NALÉHAVÉ' }; content.innerHTML = `<div class="triage-step-title">Výsledek triáže</div><div class="result-box" style="background:var(--triage-${color})">${labels[color]}</div><button class="btn-triage btn-full" style="margin-top:20px; background:var(--primary); color:white; border:none;" onclick="startJumpstart()">NOVÝ PACIENT</button>`; return; } const step = jSteps[id]; let btns = step.btns.map(b => `<button class="btn-triage" onclick="showJumpStep('${b.s}')">${b.l}</button>`).join(''); content.innerHTML = `<div class="triage-step-title">${step.q}</div><div class="triage-btns">${btns}</div>`; }
-    function openGCS() { toggleMenu(); document.getElementById('tool-modal').classList.add('active'); document.getElementById('overlay').style.display = 'block'; document.getElementById('modal-content').innerHTML = `<div class="triage-step-title">Glasgow Coma Scale</div><div class="score-row"><span class="score-label">Oči</span><select id="ge" class="score-select" onchange="cGCS()"><option value="4">4 - Spontánně</option><option value="3">3 - Na slovo</option><option value="2">2 - Na bolest</option><option value="1">1 - Nic</option></select></div><div class="score-row"><span class="score-label">Řeč</span><select id="gv" class="score-select" onchange="cGCS()"><option value="5">5 - Žvatlá, usmívá se</option><option value="4">4 - Pláč / Utišitelný</option><option value="3">3 - Křik / Neutišitelný</option><option value="2">2 - Sténání</option><option value="1">1 - Nic</option></select></div><div class="score-row"><span class="score-label">Pohyb</span><select id="gm" class="score-select" onchange="cGCS()"><option value="6">6 - Spontánní</option><option value="5">5 - Lokalizuje</option><option value="4">4 - Únik</option><option value="3">3 - Flexe</option><option value="2">2 - Extenze</option><option value="1">1 - Nic</option></select></div><div id="gr" class="result-box" style="background:var(--triage-green)">15 BODŮ <span class="result-label">NORMA</span></div>`; }
-    function cGCS() { const s = parseInt(document.getElementById('ge').value) + parseInt(document.getElementById('gv').value) + parseInt(document.getElementById('gm').value); let c, txt; if(s < 9) { c="var(--triage-red)"; txt="TĚŽKÁ PORUCHA (KÓMA)"; } else if(s < 13) { c="var(--triage-yellow)"; txt="STŘEDNÍ PORUCHA"; } else { c="var(--triage-green)"; txt="NORMA / LEHKÁ PORUCHA"; } const r = document.getElementById('gr'); r.innerHTML = `${s} BODŮ <span class="result-label">${txt}</span>`; r.style.background = c; }
-    function openApgar() { toggleMenu(); document.getElementById('tool-modal').classList.add('active'); document.getElementById('overlay').style.display = 'block'; document.getElementById('modal-content').innerHTML = `<div class="triage-step-title">Apgar skóre</div><div class="score-row"><span class="score-label">Akce srdeční</span><select class="as score-select" onchange="cAP()"><option value="2">> 100/min</option><option value="1">< 100/min</option><option value="0">Zástava</option></select></div><div class="score-row"><span class="score-label">Dýchání</span><select class="as score-select" onchange="cAP()"><option value="2">Pravidelné / Křik</option><option value="1">Nepravidelné / Lapavé</option><option value="0">Apnoe</option></select></div><div class="score-row"><span class="score-label">Reakce na odsávání</span><select class="as score-select" onchange="cAP()"><option value="2">Kašel, kýchání, křik</option><option value="1">Grimasy</option><option value="0">Bez reakce</option></select></div><div class="score-row"><span class="score-label">Svalový tonus</span><select class="as score-select" onchange="cAP()"><option value="2">Aktivní pohyb</option><option value="1">Mírná flexe končetin</option><option value="0">Chabý</option></select></div><div class="score-row"><span class="score-label">Barva kůže</span><select class="as score-select" onchange="cAP()"><option value="2">Růžová</option><option value="1">Akrocyanóza</option><option value="0">Bledá / Modrá</option></select></div><div id="ar" class="result-box" style="background:var(--triage-green)">10 BODŮ <span class="result-label">FYZIOLOGICKÝ NOVOROZENEC</span></div>`; }
-    function cAP() { const s = Array.from(document.querySelectorAll('.as')).reduce((a, b) => a + parseInt(b.value), 0); let c, txt; if(s < 4) { c="var(--triage-red)"; txt="TĚŽKÁ ASFYXIE"; } else if(s < 8) { c="var(--triage-yellow)"; txt="LEHKÁ PORUCHA ADAPTACE"; } else { c="var(--triage-green)"; txt="FYZIOLOGICKÝ NOVOROZENEC"; } const r = document.getElementById('ar'); r.innerHTML = `${s} BODŮ <span class="result-label">${txt}</span>`; r.style.background = c; }
-
-    // --- ENGINE ---
     function syncFromSlider(val) {
         const yrs = Math.floor(val/12), mos = val%12;
         document.getElementById('in-yr').value = yrs; 
@@ -340,35 +341,90 @@
         let html = "";
 
         if(activeTab === 'NORM') {
-            html = `<div class="section-header">Fyziologie</div>${rowHtml("Tepová frekvence (Tf)", yrs<1?'110-160':yrs<5?'90-140':'70-120', "/min")}${rowHtml("Systol. TK (sTK)", Math.round(70+(yrs*2)), "mmHg")}${rowHtml("Dechová frekvence (Df)", yrs<1?'30-40':yrs<5?'20-30':'15-20', "/min")}`;        
+            const ebv = yrs < 1 ? Math.round(kg * 80) : Math.round(kg * 70);
+            const stk = Math.round(70+(yrs*2));
+            const dtk = Math.round(stk * 0.66);
+            const map = Math.round(dtk + (stk - dtk)/3);
+            html = `<div class="section-header">Vitální hodnoty</div>
+                ${rowHtml("Tepová frekvence (Tf)", yrs<1?'110-160':yrs<5?'90-140':'70-120', "/min")}
+                ${rowHtml("Dechová frekvence (Df)", yrs<1?'30-40':yrs<5?'20-30':'15-20', "/min")}
+                ${rowHtml("Systol. TK (sTK)", stk, "mmHg")}
+                ${rowHtml("Diastol. TK (dTK)", dtk, "mmHg")}
+                ${rowHtml("Střední TK (MAP)", map, "mmHg")}
+                <div class="section-header">Ostatní hodnoty</div>
+                ${rowHtml("Objem krve (EBV)", ebv, "ml")}
+                ${rowHtml("Glukóza (spodní hranice)", yrs<1?'2.5':'3.3', "mmol/l")}`;        
         } else if(activeTab === 'EQUIP') {
-            html = `<div class="section-header">A / Airway</div>${rowHtml("OPA", d.opa, "")}${rowHtml("LMA", "vel. " + d.lma, "")}<div class="section-header">B / Breathing</div>${rowHtml("ET rourka", d.etk, "mm")}${rowHtml("Odsávačka", d.suction, "")}<div class="section-header">C / Circulation</div>${rowHtml("I.V. kanyla", d.cannula, "")}${rowHtml("I.O. jehla", d.io, "")}`;
+            html = `<div class="section-header">A (Airway) + B (Breathing)</div>
+                ${rowHtml("Lžíce laryngoskopu", d.blade, "")}
+                ${rowHtml("ET kanyla", d.etk, "mm")}
+                ${rowHtml("Hloubka zavedení ETK", d.depth, "cm")}
+                ${rowHtml("Ústní vzduchovod", d.opa, "")}
+                ${rowHtml("LMA", "vel. " + d.lma, "")}
+                ${rowHtml("Odsávací kanyla", d.suction, "")}
+                <div class="section-header">C (Circulation)</div>
+                ${rowHtml("I.V. kanyla", d.cannula, "")}
+                ${rowHtml("I.O. jehla", d.io, "")}`;
         } else if(activeTab === 'RES') {
-            html = `<div class="section-header">KPR</div>${rowHtml("Adrenalin (1:10k)", (kg*0.1).toFixed(1), "ml")}${rowHtml("Defibrilace (4J)", (kg*4).toFixed(0), "J")}${rowHtml("Bolus (20ml/kg)", (kg*20).toFixed(0), "ml")}`;
+            html = `<div class="section-header">KPR (ERC 2025)</div>
+                ${rowHtml("Defibrilace (4 J/kg)", (kg*4).toFixed(0), "J")}
+                ${rowHtml("Adrenalin (10 µg/kg)", (kg*0.1).toFixed(1), "ml", "1:10 000 (i.v./i.o.) - 9ml NaCl + 1ml ADR = 0,1mg/ml")}
+                ${rowHtml("Amiodaron (5 mg/kg)", (kg*5).toFixed(0), "mg", "Po 3. a 5. výboji")}
+                ${rowHtml("Atropin (20 µg/kg)", (kg*0.02).toFixed(2), "mg", "Bradykardie")}
+                ${rowHtml("Bolus tekutin", (kg*20).toFixed(0), "ml", "Krystaloid (20ml/kg)")}
+                ${rowHtml("Glukóza 10%", (kg*5).toFixed(0), "ml", "Hypoglykémie (5ml/kg)")}`;
         } else {
             const title = activeTab === 'ANE' ? "Anestezie" : "Akutní stavy";
             html = `<div class="section-header">${title}</div>`;
             
-            DRUGS.filter(dr => Array.isArray(dr.tab) ? dr.tab.includes(activeTab) : dr.tab === activeTab).forEach((dr, index) => {
-                const uniqueId = dr.id || `drug_${index}`; 
-                const isOpen = expandedIds.has(uniqueId);
+            // Filtrování a ABECEDNÍ ŘAZENÍ
+            const filteredDrugs = DRUGS.filter(dr => Array.isArray(dr.tab) ? dr.tab.includes(activeTab) : dr.tab === activeTab)
+                                       .sort((a, b) => a.name.localeCompare(b.name, 'cs'));
 
+            filteredDrugs.forEach((dr, index) => {
+                const uid = dr.id || `drug_${index}`; 
+                const isOpen = expandedIds.has(uid);
+                
                 if (dr.variants) {
-                    html += rowHtml(dr.name, "...", "mg", dr.sub, `toggleVariants('${uniqueId}')`, isOpen);
-                    html += `<div class="variant-container ${isOpen ? 'open' : ''}" id="vars-${uniqueId}">`;
+                    html += rowHtml(dr.name, "...", "", dr.sub, `toggleVariants('${uid}')`, isOpen);
+                    html += `<div class="variant-container ${isOpen ? 'open' : ''}">`;
                     dr.variants.forEach(v => {
-                        const total = (kg * v.d).toFixed(kg * v.d < 10 ? 1 : 0);
-                        html += `<div class="variant-row"><span class="variant-info">${v.l}</span><span class="variant-val">${total} mg</span></div>`;
+                        let finalVal;
+                        let unit = "mg";
+                        if (v.dMax) {
+                            let low = kg * v.d;
+                            let high = kg * v.dMax;
+                            if (low < 0.1 && low > 0) { low *= 1000; high *= 1000; unit = "µg"; }
+                            finalVal = `${low.toFixed(low < 10 ? 1 : 0)}–${high.toFixed(high < 10 ? 1 : 0)}`;
+                        } else {
+                            let res = (kg * v.d);
+                            if (res < 0.1 && res > 0) { res = res * 1000; unit = "µg"; }
+                            finalVal = res.toFixed(res < 10 ? 1 : 0);
+                        }
+                        html += `<div class="variant-row"><span class="variant-info">${v.l}</span><span class="variant-val">${finalVal} ${unit}</span></div>`;
                     });
                     html += `</div>`;
                 } else {
-                    const total = (kg * dr.dose).toFixed(kg * dr.dose < 10 ? 1 : 0);
-                    html += rowHtml(dr.name, total, dr.unit, dr.sub);
+                    let res = (kg * dr.dose);
+                    let unit = dr.unit;
+                    if (res < 0.1 && res > 0 && unit === "mg") { res = res * 1000; unit = "µg"; }
+                    const total = res.toFixed(res < 1 ? 2 : (res < 10 ? 1 : 0));
+                    html += rowHtml(dr.name, total, unit, dr.sub);
                 }
             });
         }
         view.innerHTML = html;
     }
+    
+    // Nástroje (JumpSTART, GCS, Apgar)
+    const jSteps = { walk: { q: "Může dítě chodit?", btns: [{l:"Ano", s:"result-green"}, {l:"Ne", s:"breath"}] }, breath: { q: "Dýchá dítě?", btns: [{l:"Ano", s:"rate"}, {l:"Ne", s:"airway"}] }, airway: { q: "Po uvolnění cest dýchá?", btns: [{l:"Ano", s:"result-red"}, {l:"Ne", s:"pulse"}] }, pulse: { q: "Má hmatný puls?", btns: [{l:"Ano", s:"rescue"}, {l:"Ne", s:"result-black"}] }, rescue: { q: "Dýchá po 5 vdeších?", btns: [{l:"Ano", s:"result-red"}, {l:"Ne", s:"result-black"}] }, rate: { q: "Dechová frekvence?", btns: [{l:"< 15 nebo > 45", s:"result-red"}, {l:"15 - 45 /min", s:"pulseCheck"}] }, pulseCheck: { q: "Hmatný puls?", btns: [{l:"Ne", s:"result-red"}, {l:"Ano", s:"avpu"}] }, avpu: { q: "Reakce (AVPU)?", btns: [{l:"P nebo U", s:"result-red"}, {l:"A nebo V", s:"result-yellow"}] } };
+    function startJumpstart() { toggleMenu(); document.getElementById('tool-modal').classList.add('active'); document.getElementById('overlay').style.display = 'block'; showJumpStep('walk'); }
+    function showJumpStep(id) { const content = document.getElementById('modal-content'); if(id.startsWith('result')) { const color = id.split('-')[1]; const labels = { green: 'LEHKÉ', red: 'KRITICKÉ', black: 'MRTVÉ', yellow: 'NALÉHAVÉ' }; content.innerHTML = `<div class="triage-step-title">Výsledek triáže</div><div class="result-box" style="background:var(--triage-${color})">${labels[color]}</div><button class="btn-triage btn-full" style="margin-top:20px; background:var(--primary); color:white; border:none;" onclick="startJumpstart()">NOVÝ PACIENT</button>`; return; } const step = jSteps[id]; let btns = step.btns.map(b => `<button class="btn-triage" onclick="showJumpStep('${b.s}')">${b.l}</button>`).join(''); content.innerHTML = `<div class="triage-step-title">${step.q}</div><div class="triage-btns">${btns}</div>`; }
+    function openGCS() { toggleMenu(); document.getElementById('tool-modal').classList.add('active'); document.getElementById('overlay').style.display = 'block'; document.getElementById('modal-content').innerHTML = `<div class="triage-step-title">Glasgow Coma Scale</div><div class="score-row"><span class="score-label">Oči</span><select id="ge" class="score-select" onchange="cGCS()"><option value="4">4 - Spontánně</option><option value="3">3 - Na slovo</option><option value="2">2 - Na bolest</option><option value="1">1 - Nic</option></select></div><div class="score-row"><span class="score-label">Řeč</span><select id="gv" class="score-select" onchange="cGCS()"><option value="5">5 - Žvatlá, usmívá se</option><option value="4">4 - Pláč / Utišitelný</option><option value="3">3 - Křik / Neutišitelný</option><option value="2">2 - Sténání</option><option value="1">1 - Nic</option></select></div><div class="score-row"><span class="score-label">Pohyb</span><select id="gm" class="score-select" onchange="cGCS()"><option value="6">6 - Spontánní</option><option value="5">5 - Lokalizuje</option><option value="4">4 - Únik</option><option value="3">3 - Flexe</option><option value="2">2 - Extenze</option><option value="1">1 - Nic</option></select></div><div id="gr" class="result-box" style="background:var(--triage-green)">15 BODŮ <span class="result-label">NORMA</span></div>`; }
+    function cGCS() { const s = parseInt(document.getElementById('ge').value) + parseInt(document.getElementById('gv').value) + parseInt(document.getElementById('gm').value); let c, txt; if(s < 9) { c="var(--triage-red)"; txt="TĚŽKÁ PORUCHA (KÓMA)"; } else if(s < 13) { c="var(--triage-yellow)"; txt="STŘEDNÍ PORUCHA"; } else { c="var(--triage-green)"; txt="NORMA / LEHKÁ PORUCHA"; } const r = document.getElementById('gr'); r.innerHTML = `${s} BODŮ <span class="result-label">${txt}</span>`; r.style.background = c; }
+    function openApgar() { toggleMenu(); document.getElementById('tool-modal').classList.add('active'); document.getElementById('overlay').style.display = 'block'; document.getElementById('modal-content').innerHTML = `<div class="triage-step-title">Apgar skóre</div><div class="score-row"><span class="score-label">Akce srdeční</span><select class="as score-select" onchange="cAP()"><option value="2">> 100/min</option><option value="1">< 100/min</option><option value="0">Zástava</option></select></div><div class="score-row"><span class="score-label">Dýchání</span><select class="as score-select" onchange="cAP()"><option value="2">Pravidelné / Křik</option><option value="1">Nepravidelné / Lapavé</option><option value="0">Apnoe</option></select></div><div class="score-row"><span class="score-label">Reakce na odsávání</span><select class="as score-select" onchange="cAP()"><option value="2">Kašel, kýchání, křik</option><option value="1">Grimasy</option><option value="0">Bez reakce</option></select></div><div class="score-row"><span class="score-label">Svalový tonus</span><select class="as score-select" onchange="cAP()"><option value="2">Aktivní pohyb</option><option value="1">Mírná flexe končetin</option><option value="0">Chabý</option></select></div><div class="score-row"><span class="score-label">Barva kůže</span><select class="as score-select" onchange="cAP()"><option value="2">Růžová</option><option value="1">Akrocyanóza</option><option value="0">Bledá / Modrá</option></select></div><div id="ar" class="result-box" style="background:var(--triage-green)">10 BODŮ <span class="result-label">FYZIOLOGICKÝ NOVOROZENEC</span></div>`; }
+    function cAP() { const s = Array.from(document.querySelectorAll('.as')).reduce((a, b) => a + parseInt(b.value), 0); let c, txt; if(s < 4) { c="var(--triage-red)"; txt="TĚŽKÁ ASFYXIE"; } else if(s < 8) { c="var(--triage-yellow)"; txt="LEHKÁ PORUCHA ADAPTACE"; } else { c="var(--triage-green)"; txt="FYZIOLOGICKÝ NOVOROZENEC"; } const r = document.getElementById('ar'); r.innerHTML = `${s} BODŮ <span class="result-label">${txt}</span>`; r.style.background = c; }
+
     syncFromSlider(12);
 </script>
 </body>
