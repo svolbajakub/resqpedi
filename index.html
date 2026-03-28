@@ -269,11 +269,17 @@
             sub: "Rozbalit pro cesty a dávky ▼",
             variants: [
                 { l: "Analgezie (i.v.)", d: 0.3, dMax: 0.5 },
-                { l: "Sedace (i.v.)", d: 1.0 },
-                { l: "Anestezie (i.v.)", d: 2.0 },
-                { l: "Analgezie (i.m.)", d: 0.5 },
-                { l: "Sedace (i.m.)", d: 1.0 },
-                { l: "Anestezie (i.m.)", d: 2.0 },
+                { l: "Sedace (i.v.)", d: 0.5, dMax: 1.0 },
+                { l: "Anestezie (i.v.)", d: 1.0, dMax: 2.0 },
+                { l: "Analgezie (i.m.)", d: 0.5, dMax: 1.0 },
+                { l: "Sedace (i.m.)", d: 2.0, dMax: 4.0 },
+                { l: "Anestezie (i.m.)", d: 5.0, dMax: 10.0 },
+                { l: "Analgezie (p.r.)", d: 2.0, dMax: 5.0 },
+                { l: "Sedace (p.r.)", d: 5.0, dMax: 8.0 },
+                { l: "Anestezie (p.r.)", d: 8.0, dMax: 12.0 },
+                { l: "Analgezie (i.n.)", d: 0.2, dMax: 0.5 },
+                { l: "Sedace (i.n.)", d: 2.0, dMax: 5.0 },
+                { l: "Anestezie (i.n.)", d: 6.0, dMax: 10.0 }
             ]
         }
     ];
@@ -391,6 +397,14 @@
                     dr.variants.forEach(v => {
                         let finalVal;
                         let unit = "mg";
+                        
+                        // BARVY PRO SEKCE
+                        let bgStyle = "";
+                        if (v.l.includes("i.v.")) bgStyle = "background-color: rgba(255, 59, 48, 0.08);";
+                        else if (v.l.includes("i.m.")) bgStyle = "background-color: rgba(175, 82, 222, 0.12);";
+                        else if (v.l.includes("p.r.")) bgStyle = "background-color: rgba(139, 69, 19, 0.1);";
+                        else if (v.l.includes("i.n.")) bgStyle = "background-color: rgba(76, 217, 100, 0.12);";
+
                         if (v.dMax) {
                             let low = kg * v.d;
                             let high = kg * v.dMax;
@@ -401,7 +415,7 @@
                             if (res < 0.1 && res > 0) { res = res * 1000; unit = "µg"; }
                             finalVal = res.toFixed(res < 10 ? 1 : 0);
                         }
-                        html += `<div class="variant-row"><span class="variant-info">${v.l}</span><span class="variant-val">${finalVal} ${unit}</span></div>`;
+                        html += `<div class="variant-row" style="${bgStyle} margin: 0 -20px; padding: 10px 20px;"><span class="variant-info">${v.l}</span><span class="variant-val">${finalVal} ${unit}</span></div>`;
                     });
                     html += `</div>`;
                 } else {
