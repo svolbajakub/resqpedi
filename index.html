@@ -21,6 +21,7 @@
             --primary: #007AFF;
             --accent: #ff3b30;
             --border: #d1d1d6;
+            --tab-bg: rgba(0, 0, 0, 0.06);
             --shadow-soft: 0 4px 12px rgba(0,0,0,0.08);
             --shadow-heavy: 0 12px 30px rgba(0,0,0,0.2);
             --triage-red: #ff3b30;
@@ -40,6 +41,7 @@
             --primary: #0A84FF;
             --accent: #ff453a;
             --border: #38383a;
+            --tab-bg: rgba(255, 255, 255, 0.1);
             --zebra: rgba(255, 255, 255, 0.05);
         }
 
@@ -144,8 +146,8 @@
 
         .data-card { flex: 1; background: var(--card); border-top: 1px solid var(--border); border-radius: 35px 35px 0 0; display: flex; flex-direction: column; overflow: hidden; }
         .tab-nav { display: flex; background: var(--surface); padding: 6px; gap: 4px; overflow-x: auto; scrollbar-width: none; }
-        .tab-item { flex: 1; min-width: 75px; padding: 14px 0; border: none; background: none; font-size: 0.65rem; font-weight: 800; color: var(--text-muted); border-radius: 14px; }
-        .tab-item.active { background: var(--card); color: var(--primary); }
+        .tab-item { flex: 1; min-width: 75px; padding: 14px 0; border: none; background: var(--tab-bg); font-size: 0.65rem; font-weight: 800; color: var(--text-muted); border-radius: 14px; transition: background 0.2s, color 0.2s; }
+        .tab-item.active { background: var(--card); color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
         .tab-content { padding: 10px 0; overflow-y: auto; flex: 1; }
         .section-header { font-size: 0.75rem; font-weight: 900; color: var(--accent); text-transform: uppercase; margin: 15px 20px 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
@@ -197,15 +199,15 @@
         <div class="info-box">
             <span class="label-top">Věk dítěte</span>
             <div class="input-group">
-                <div class="input-stack"><input type="number" id="in-yr" class="edit-input" onchange="manualUpdate('age')"><span class="unit-label">roky</span></div>
-                <div class="input-stack"><input type="number" id="in-mo" class="edit-input" onchange="manualUpdate('age')"><span class="unit-label">měs.</span></div>
+                <div class="input-stack"><input type="number" inputmode="decimal" id="in-yr" class="edit-input" onchange="manualUpdate('age')"><span class="unit-label">roky</span></div>
+                <div class="input-stack"><input type="number" inputmode="decimal" id="in-mo" class="edit-input" onchange="manualUpdate('age')"><span class="unit-label">měs.</span></div>
             </div>
         </div>
         <div class="info-box">
             <span class="label-top">Váha / Výška</span>
             <div class="input-group">
-                <div class="input-stack"><input type="number" id="in-kg" class="edit-input" onchange="manualUpdate('kg')"><span class="unit-label">kg</span></div>
-                <div class="input-stack"><input type="number" id="in-cm" class="edit-input" onchange="manualUpdate('cm')"><span class="unit-label">cm</span></div>
+                <div class="input-stack"><input type="number" inputmode="decimal" id="in-kg" class="edit-input" onchange="manualUpdate('kg')"><span class="unit-label">kg</span></div>
+                <div class="input-stack"><input type="number" inputmode="decimal" id="in-cm" class="edit-input" onchange="manualUpdate('cm')"><span class="unit-label">cm</span></div>
             </div>
         </div>
     </div>
@@ -246,8 +248,8 @@
         { name: "Propofol", dose: 3, unit: "mg", sub: "3mg/kg; Úvod do CA", tab: "ANE" },
         { name: "Suxamethonium", dose: 2, unit: "mg", sub: "2mg/kg; RSI", tab: "ANE" },
         { 
-            id: "drug_ketamin", // Přidáno unikátní ID pro sledování rozbalení
-            name: "Calypsol", 
+            id: "drug_ketamin",
+            name: "KETAMIN (Calypsol)", 
             tab: ["ANE", "EMGY"], 
             sub: "Rozbalit pro cesty a dávky ▼",
             variants: [
@@ -261,7 +263,7 @@
     ];
 
     let activeTab = 'NORM', curB = "PURPLE";
-    let expandedIds = new Set(); // Sem si ukládáme ID rozbalených léků
+    let expandedIds = new Set(); 
 
     function toggleMenu() { 
         const d = document.getElementById('drawer'), o = document.getElementById('overlay');
@@ -283,10 +285,10 @@
         } else {
             expandedIds.add(id);
         }
-        render(); // Změníme stav a rovnou překreslíme
+        render(); 
     }
 
-    // --- TRIAGE, GCS, APGAR (Zůstává stejné) ---
+    // --- TRIAGE, GCS, APGAR ---
     const jSteps = { walk: { q: "Může dítě chodit?", btns: [{l:"Ano", s:"result-green"}, {l:"Ne", s:"breath"}] }, breath: { q: "Dýchá dítě?", btns: [{l:"Ano", s:"rate"}, {l:"Ne", s:"airway"}] }, airway: { q: "Po uvolnění cest dýchá?", btns: [{l:"Ano", s:"result-red"}, {l:"Ne", s:"pulse"}] }, pulse: { q: "Má hmatný puls?", btns: [{l:"Ano", s:"rescue"}, {l:"Ne", s:"result-black"}] }, rescue: { q: "Dýchá po 5 vdeších?", btns: [{l:"Ano", s:"result-red"}, {l:"Ne", s:"result-black"}] }, rate: { q: "Dechová frekvence?", btns: [{l:"< 15 nebo > 45", s:"result-red"}, {l:"15 - 45 /min", s:"pulseCheck"}] }, pulseCheck: { q: "Hmatný puls?", btns: [{l:"Ne", s:"result-red"}, {l:"Ano", s:"avpu"}] }, avpu: { q: "Reakce (AVPU)?", btns: [{l:"P nebo U", s:"result-red"}, {l:"A nebo V", s:"result-yellow"}] } };
     function startJumpstart() { toggleMenu(); document.getElementById('tool-modal').classList.add('active'); document.getElementById('overlay').style.display = 'block'; showJumpStep('walk'); }
     function showJumpStep(id) { const content = document.getElementById('modal-content'); if(id.startsWith('result')) { const color = id.split('-')[1]; const labels = { green: 'LEHKÉ', red: 'KRITICKÉ', black: 'MRTVÉ', yellow: 'NALÉHAVÉ' }; content.innerHTML = `<div class="triage-step-title">Výsledek triáže</div><div class="result-box" style="background:var(--triage-${color})">${labels[color]}</div><button class="btn-triage btn-full" style="margin-top:20px; background:var(--primary); color:white; border:none;" onclick="startJumpstart()">NOVÝ PACIENT</button>`; return; } const step = jSteps[id]; let btns = step.btns.map(b => `<button class="btn-triage" onclick="showJumpStep('${b.s}')">${b.l}</button>`).join(''); content.innerHTML = `<div class="triage-step-title">${step.q}</div><div class="triage-btns">${btns}</div>`; }
@@ -348,7 +350,7 @@
             html = `<div class="section-header">${title}</div>`;
             
             DRUGS.filter(dr => Array.isArray(dr.tab) ? dr.tab.includes(activeTab) : dr.tab === activeTab).forEach((dr, index) => {
-                const uniqueId = dr.id || `drug_${index}`; // Použijeme ID z databáze nebo vytvoříme náhradní
+                const uniqueId = dr.id || `drug_${index}`; 
                 const isOpen = expandedIds.has(uniqueId);
 
                 if (dr.variants) {
