@@ -89,11 +89,47 @@
 
         .modal {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 90%; max-width: 400px; background: var(--card); 
-            border-radius: 25px; z-index: 400; padding: 25px; display: none;
+            width: 92%; max-width: 420px; background: var(--card); 
+            border-radius: 25px; z-index: 400; padding: 20px; display: none;
             box-shadow: var(--shadow-heavy); border: 1px solid var(--border);
+            max-height: 95vh; overflow-y: auto;
         }
         .modal.active { display: block; }
+
+        .calc-grid { display: grid; gap: 12px; margin-bottom: 15px; }
+        .calc-field { display: flex; flex-direction: column; gap: 5px; }
+        .calc-label { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
+        .calc-input-row { display: flex; gap: 8px; align-items: center; }
+        .calc-in { flex: 1; padding: 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); color: var(--text-main); font-weight: 700; font-size: 1rem; font-family: inherit; }
+        .calc-sel { padding: 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); font-weight: 700; color: var(--text-main); font-family: inherit; }
+        
+        .search-container { position: relative; margin-bottom: 10px; }
+        #calc-search-input { width: 100%; padding: 12px; padding-right: 40px; border-radius: 12px; border: 1px solid var(--primary); background: var(--surface); color: var(--text-main); font-weight: 600; font-family: inherit; }
+        .search-clear { 
+            position: absolute; right: 12px; top: 22px; transform: translateY(-50%); 
+            font-size: 1.4rem; color: var(--text-muted); cursor: pointer; display: none;
+            line-height: 1; padding: 5px;
+        }
+        .drug-list-scroll { max-height: 150px; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; margin-top: 5px; background: var(--surface); }
+        .drug-option { padding: 10px 15px; border-bottom: 1px solid var(--border); font-size: 0.9rem; cursor: pointer; font-weight: 600; }
+        .drug-option:last-child { border-bottom: none; }
+        .drug-option:active { background: var(--primary); color: white; }
+
+        .switch-container { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .switch-btn { 
+            padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border); 
+            background: var(--surface); font-size: 0.8rem; font-weight: 700; cursor: pointer;
+            white-space: nowrap; flex: 1; text-align: center; color: var(--text-main);
+        }
+        .switch-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .res-pill { background: var(--primary); color: white; padding: 18px; border-radius: 20px; margin-top: 10px; transition: background 0.3s; }
+        .res-pill.warning { background: var(--accent); }
+        .res-highlight { font-weight: 900; font-size: 1.6rem; display: block; text-align: center; margin: 10px 0; }
+        .res-divider { border-top: 1px solid rgba(255,255,255,0.3); margin: 12px 0; }
+        .solvent-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; background: rgba(255,255,255,0.2); font-size: 0.75rem; margin-top: 5px; }
+        .warning-text { font-size: 0.75rem; font-weight: 800; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 10px; margin-bottom: 10px; text-align: center; display: block; }
+
         .triage-step-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 20px; text-align: center; }
         .triage-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
@@ -177,6 +213,7 @@
     
     <div class="drawer" id="drawer">
         <h2 style="margin: 0 0 10px 0;">Nástroje</h2>
+        <div class="drawer-item" onclick="openCalc()">💉 Kalkulačka ředění</div>
         <div class="drawer-item" onclick="startJumpstart()">🚑 JumpSTART Triage</div>
         <div class="drawer-item" onclick="openGCS()">🧠 GCS</div>
         <div class="drawer-item" onclick="openApgar()">👶 Apgar skóre</div>
@@ -186,7 +223,7 @@
 
     <div id="tool-modal" class="modal">
         <div id="modal-content"></div>
-        <button class="btn-triage btn-full" style="margin-top:20px; border-color:transparent; color:var(--primary); background:none;" onclick="closeAll()">ZAVŘÍT</button>
+        <button class="btn-triage btn-full" style="margin-top:20px; border-color:transparent; color:var(--primary); background:none;" onclick="closeAll()">HOTOVO</button>
     </div>
 
     <header>
@@ -242,7 +279,6 @@
     };
 
     const DRUGS = [
-        // ANESTEZIE
         { name: "Propofol", dose: 3, unit: "mg", sub: "Úvod do CA (i.v.)", tab: "ANE" },
         { name: "Etomidát", dose: 0.3, unit: "mg", sub: "Kardiostabilní úvod (i.v.)", tab: "ANE" },
         { name: "Thiopental", dose: 5, unit: "mg", sub: "Úvod do CA (i.v.)", tab: "ANE" },
@@ -250,8 +286,6 @@
         { name: "Suxamethonium", dose: 2, unit: "mg", sub: "RSI (i.v.)", tab: "ANE" },
         { name: "Atropin", dose: 0.02, unit: "mg", sub: "Premedikace (i.v.)", tab: ["ANE", "RES"] },
         { name: "Sufentanil", dose: 0.0002, unit: "mg", sub: "0.2 µg/kg (i.v.)", tab: "ANE" },
-        
-        // AKUTNÍ STAVY
         { name: "Adrenalin (i.m.)", dose: 0.01, unit: "mg", sub: "Anafylaxe", tab: "EMGY" },
         { name: "Dexamethason (i.v./i.m.)", dose: 0.6, unit: "mg", sub: "Laryngitida", tab: "EMGY" },
         { name: "Adenosin (i.v.)", dose: 0.1, unit: "mg", sub: "SVT (rapidní i.v. podání)", tab: "EMGY" },
@@ -260,8 +294,6 @@
         { name: "Glukóza 10% (i.v.)", dose: 5, unit: "ml", sub: "Hypoglykémie", tab: "EMGY" },
         { name: "Naloxon(i.v./i.m.)", dose: 0.01, unit: "mg", sub: "Antidotum opioidů ", tab: "EMGY" },
         { name: "Flumazenil (i.v.)", dose: 0.01, unit: "mg", sub: "Antidotum benzodiazepinů", tab: "EMGY" },
-        
-        // KETAMIN
         { 
             id: "drug_ketamin",
             name: "Calypsol", 
@@ -283,6 +315,74 @@
             ]
         }
     ];
+
+    const CALC_DB = [
+        {n: "Acide Acetylsalycique", d: 10, u: "mg/kg", amp: 500, ampV: 1, sol: "p.o. (tbl)", limit: {minY: 15, msg: "Riziko Reyeova syndromu do 15 let!"}},
+        {n: "Adenocor", d: 0.1, u: "mg/kg", amp: 6, ampV: 2, sol: "NaCl (rapidní i.v.)"},
+        {n: "Adrenalin", d: 10, u: "mcg/kg", amp: 1, ampV: 1, sol: "NaCl"},
+        {n: "Analgin", d: 20, u: "mg/kg", amp: 1000, ampV: 2, sol: "NaCl / G5%", limit: {minKg: 5, msg: "SPC: Kontraindikováno pod 5 kg váhy."}},
+        {n: "Anopyrin", d: 10, u: "mg/kg", amp: 100, ampV: 1, sol: "p.o. (tbl)", limit: {minY: 15, msg: "Riziko Reyeova syndromu do 15 let!"}},
+        {n: "Apaurin", d: 0.2, u: "mg/kg", amp: 10, ampV: 2, sol: "Neředit (i.v. pomalu)"},
+        {n: "Aqua pro inj.", d: 0, u: "ml", amp: 10, ampV: 10, sol: "Rozpouštědlo"},
+        {n: "Atropin", d: 20, u: "mcg/kg", amp: 0.5, ampV: 1, sol: "NaCl / Aqua"},
+        {n: "Berodual liq.", d: 0.05, u: "ml/kg", amp: 0.25, ampV: 1, sol: "Inhalačně v NaCl"},
+        {n: "Berodual spr.", d: 1, u: "vdech", amp: 1, ampV: 1, sol: "Inhalačně"},
+        {n: "Betadine desinf.", d: 0, u: "-", amp: 1, ampV: 1, sol: "Lokálně", limit: {minM: 6, msg: "Opatrně u novorozenců (riziko resorpce jodu)."}},
+        {n: "Betaloc", d: 0.1, u: "mg/kg", amp: 5, ampV: 5, sol: "NaCl / G5%"},
+        {n: "Bricanyl", d: 5, u: "mcg/kg", amp: 0.5, ampV: 1, sol: "NaCl"},
+        {n: "Brilique", d: 0, u: "mg", amp: 90, ampV: 1, sol: "p.o. (tbl)", limit: {minY: 18, msg: "SPC: Bezpečnost u dětí nebyla stanovena (Kontraindikováno)."}},
+        {n: "Butylskopolamin", d: 0.3, u: "mg/kg", amp: 20, ampV: 1, sol: "NaCl", limit: {minY: 6, msg: "SPC: Použití od 6 let."}},
+        {n: "Calcium Chloratum 10%", d: 20, u: "mg/kg", amp: 1000, ampV: 10, sol: "i.v. pomalu!"},
+        {n: "Calypsol", d: 1, u: "mg/kg", amp: 500, ampV: 10, sol: "NaCl / G5%"},
+        {n: "Carbosorb plv.", d: 1000, u: "mg/kg", amp: 25000, ampV: 1, sol: "p.o. (suspenze)", limit: {minY: 3, msg: "SPC: Od 3 let věku."}},
+        {n: "Cefotaxime", d: 50, u: "mg/kg", amp: 1000, ampV: 1, sol: "NaCl / Aqua"},
+        {n: "Cordarone", d: 5, u: "mg/kg", amp: 150, ampV: 3, sol: "G5% (VÝHRADNĚ!)", limit: {minKg: 3, msg: "Pozor na benzylalkohol u novorozenců!"}},
+        {n: "Dexamed", d: 0.6, u: "mg/kg", amp: 8, ampV: 2, sol: "NaCl / G5%"},
+        {n: "Dexamethason supp.", d: 1, u: "čípek", amp: 1, ampV: 1, sol: "p.r."},
+        {n: "Diazepam Rectal Tube", d: 0.5, u: "mg/kg", amp: 5, ampV: 2.5, sol: "p.r.", limit: {minKg: 10, msg: "Tuba 5mg je určena pro děti nad 10kg."}},
+        {n: "Dithiaden", d: 0.05, u: "mg/kg", amp: 1, ampV: 1, sol: "NaCl", limit: {minY: 1, msg: "SPC: Kontraindikováno do 1 roku věku."}},
+        {n: "Dolmina", d: 1, u: "mg/kg", amp: 75, ampV: 3, sol: "NaCl (i.m. / i.v. infuze)", limit: {minY: 15, msg: "SPC: i.m. podání až od 15 let. (Pediatrie: Off-label)"}},
+        {n: "Ebrantil", d: 0.5, u: "mg/kg", amp: 25, ampV: 5, sol: "NaCl"},
+        {n: "Ephedrin", d: 0.1, u: "mg/kg", amp: 50, ampV: 1, sol: "NaCl"},
+        {n: "Exacyl", d: 15, u: "mg/kg", amp: 500, ampV: 5, sol: "NaCl"},
+        {n: "F1/1", d: 20, u: "ml/kg", amp: 1, ampV: 1, sol: "Krystaloid"},
+        {n: "Flumazenil", d: 10, u: "mcg/kg", amp: 0.5, ampV: 5, sol: "NaCl", limit: {minY: 1, msg: "SPC: Omezené zkušenosti u dětí do 1 roku."}},
+        {n: "Furosemid", d: 1, u: "mg/kg", amp: 20, ampV: 2, sol: "NaCl"},
+        {n: "Gelaspon", d: 0, u: "-", amp: 1, ampV: 1, sol: "Lokálně"},
+        {n: "Glukóza 40%", d: 500, u: "mg/kg", amp: 400, ampV: 1, sol: "i.v. pomalu", limit: {minKg: 3, msg: "Silně dráždivé - ředit na max. 10-12.5%!"}},
+        {n: "Glukóza 5%", d: 1, u: "ml", amp: 1, ampV: 1, sol: "Infuze"},
+        {n: "Haloperidol", d: 0.05, u: "mg/kg", amp: 5, ampV: 1, sol: "NaCl", limit: {minY: 3, msg: "SPC: Použití od 3 let."}},
+        {n: "Heparin", d: 50, u: "UI/kg", amp: 25000, ampV: 5, sol: "NaCl"},
+        {n: "Infadolan ung.", d: 0, u: "-", amp: 1, ampV: 1, sol: "Lokálně"},
+        {n: "Isoket", d: 1, u: "mcg/kg/min", amp: 10, ampV: 10, sol: "G5% / NaCl"},
+        {n: "Lexaurin", d: 0, u: "mg", amp: 3, ampV: 1, sol: "p.o. (tbl)", limit: {minY: 18, msg: "SPC: Nedoporučuje se u dětí do 18 let."}},
+        {n: "Mesocain 1%", d: 1, u: "mg/kg", amp: 100, ampV: 10, sol: "Lokální / i.v."},
+        {n: "Mesocain gel", d: 0, u: "-", amp: 1, ampV: 1, sol: "Lokálně"},
+        {n: "Methylergometrin", d: 0.1, u: "mg", amp: 0.2, ampV: 1, sol: "i.m. / i.v. (porod)"},
+        {n: "MgSO4 20%", d: 40, u: "mg/kg", amp: 2000, ampV: 10, sol: "i.v. pomalu"},
+        {n: "Midazolam", d: 0.1, u: "mg/kg", amp: 5, ampV: 1, sol: "NaCl / G5%", limit: {minM: 6, msg: "SPC: Riziko apnoe u kojenců pod 6 měsíců."}},
+        {n: "Morphin BBP 1%", d: 0.1, u: "mg/kg", amp: 10, ampV: 1, sol: "NaCl", limit: {minM: 6, msg: "Vysoké riziko dechové deprese do 6 měsíců věku!"}},
+        {n: "Naloxon", d: 10, u: "mcg/kg", amp: 0.4, ampV: 1, sol: "NaCl"},
+        {n: "Noradrenalin", d: 0.1, u: "mcg/kg/min", amp: 1, ampV: 1, sol: "G5% (infuze)"},
+        {n: "Novalgin", d: 20, u: "mg/kg", amp: 2500, ampV: 5, sol: "NaCl / G5%", limit: {minKg: 5, msg: "SPC: Kontraindikováno pod 3 měsíce nebo 5 kg."}},
+        {n: "Ondansetron", d: 0.15, u: "mg/kg", amp: 4, ampV: 2, sol: "NaCl", limit: {minY: 1, msg: "SPC: Podání až od 1 roku věku."}},
+        {n: "Ophtal aqa.", d: 0, u: "-", amp: 1, ampV: 1, sol: "Oční výplach"},
+        {n: "Paralen", d: 15, u: "mg/kg", amp: 100, ampV: 1, sol: "p.r. / p.o."},
+        {n: "Perlinganit", d: 0.5, u: "mcg/kg/min", amp: 10, ampV: 10, sol: "NaCl / G5%"},
+        {n: "Propofol 1%", d: 3, u: "mg/kg", amp: 200, ampV: 20, sol: "Neředit", limit: {minM: 1, msg: "SPC: Kontraindikováno do 1 měsíce věku."}},
+        {n: "Ringerfundin", d: 20, u: "ml/kg", amp: 1, ampV: 1, sol: "Krystaloid"},
+        {n: "Rocuronium", d: 1, u: "mg/kg", amp: 50, ampV: 5, sol: "NaCl"},
+        {n: "Sefotak", d: 50, u: "mg/kg", amp: 1000, ampV: 1, sol: "NaCl / Aqua"},
+        {n: "Solu-Medrol", d: 2, u: "mg/kg", amp: 40, ampV: 1, sol: "Aqua / NaCl"},
+        {n: "Sufentanil", d: 0.2, u: "mcg/kg", amp: 0.01, ampV: 2, sol: "NaCl"},
+        {n: "Suxamethonium", d: 2, u: "mg/kg", amp: 100, ampV: 2, sol: "NaCl", limit: {minKg: 3, msg: "Pozor na bradykardii a hyperkalémii u dětí!"}},
+        {n: "Syntophyllin", d: 5, u: "mg/kg", amp: 240, ampV: 10, sol: "G5% (infuze)", limit: {minM: 6, msg: "SPC: Nepoužívat u dětí do 6 měsíců věku."}},
+        {n: "Tensiomin", d: 0, u: "mg", amp: 25, ampV: 1, sol: "p.o. (tbl)"},
+        {n: "Torecan", d: 0.1, u: "mg/kg", amp: 6.5, ampV: 1, sol: "i.m. / i.v. pomalu", limit: {minY: 15, msg: "SPC: Kontraindikováno pod 15 let (Extrapyramidové příznaky)!"}},
+        {n: "Ventolin liq.", d: 0.1, u: "ml/kg", amp: 5, ampV: 1, sol: "Inhalačně v NaCl"},
+        {n: "Ventolin spr.", d: 1, u: "vdech", amp: 100, ampV: 1, sol: "Inhalačně"},
+        {n: "Xylocain spr. 10%", d: 0, u: "-", amp: 1, ampV: 1, sol: "Lokálně (sliznice)"}
+    ].sort((a,b) => a.n.localeCompare(b.n, 'cs'));
 
     let activeTab = 'NORM', curB = "PURPLE";
     let expandedIds = new Set(); 
@@ -309,7 +409,7 @@
         const yrs = Math.floor(val/12), mos = val%12;
         document.getElementById('in-yr').value = yrs; 
         document.getElementById('in-mo').value = mos;
-        let kg = (yrs >= 1) ? (yrs + 4) * 2 : (val * 0.5 + 3.5);
+        let kg = (yrs >= 1) ? (yrs + 4) * 2 : (val * 0.5 + 3.0);
         document.getElementById('in-kg').value = kg.toFixed(kg<10?1:0);
         document.getElementById('in-cm').value = Math.round(45 + (val * 0.7));
         updateBroselow(kg); render();
@@ -317,18 +417,22 @@
     function manualUpdate(src) {
         let m = 0;
         if(src==='age') m = (parseInt(document.getElementById('in-yr').value)||0)*12 + (parseInt(document.getElementById('in-mo').value)||0);
-        else if(src==='kg') { let k = parseFloat(document.getElementById('in-kg').value)||0; m = k>10 ? (k/2-4)*12 : (k-3.5)/0.5; }
+        else if(src==='kg') { 
+            let k = parseFloat(document.getElementById('in-kg').value)||3;
+            if (k < 3) k = 3; 
+            m = k>10 ? (k/2-4)*12 : (k-3.0)/0.5; 
+        }
         m = Math.max(0, Math.min(144, m)); 
         document.getElementById('main-slider').value = m; syncFromSlider(m);
     }
     function updateBroselow(kg) {
-        let c="#808080", t="GREY", f="white", w="~4";
-        if(kg>5){c="#ffc0cb";t="PINK";f="black";w="6-7";} if(kg>7){c="#ff3b30";t="RED";f="white";w="8-9";}
-        if(kg>9){c="#af52de";t="PURPLE";f="white";w="10-11";} if(kg>11){c="#ffcc00";t="YELLOW";f="black";w="12-14";}
-        if(kg>14){c="#ffffff";t="WHITE";f="black";w="15-18";} if(kg>18){c="#007aff";t="BLUE";f="white";w="19-22";}
-        if(kg>23){c="#ff9500";t="ORANGE";f="black";w="24-28";} if(kg>29){c="#4cd964";t="GREEN";f="black";w="30-36";}
+        let c="#808080", t="GREY", f="white", w="3-5";
+        if(kg>5.5){c="#ffc0cb";t="PINK";f="black";w="6-7";} if(kg>7.5){c="#ff3b30";t="RED";f="white";w="8-9";}
+        if(kg>9.5){c="#af52de";t="PURPLE";f="white";w="10-11";} if(kg>11.5){c="#ffcc00";t="YELLOW";f="black";w="12-14";}
+        if(kg>14.5){c="#ffffff";t="WHITE";f="black";w="15-18";} if(kg>18.5){c="#007aff";t="BLUE";f="white";w="19-22";}
+        if(kg>23.5){c="#ff9500";t="ORANGE";f="black";w="24-28";} if(kg>29.5){c="#4cd964";t="GREEN";f="black";w="30-36";}
         curB = t; const b = document.getElementById('broselow-badge');
-        b.style.backgroundColor = c; b.style.color = f; b.innerText = `${t} (~${w} kg)`;
+        b.style.backgroundColor = c; b.style.color = f; b.innerText = `${t} (${w} kg)`;
     }
     
     function rowHtml(l, v, u, sub="", onClick="", isOpen=false) { 
@@ -343,9 +447,8 @@
     }
 
     function render() {
-        const view = document.getElementById('data-view'), kg = parseFloat(document.getElementById('in-kg').value)||0, yrs = parseInt(document.getElementById('in-yr').value)||0, d = FULL_DB[curB];
+        const view = document.getElementById('data-view'), kg = parseFloat(document.getElementById('in-kg').value)||3, yrs = parseInt(document.getElementById('in-yr').value)||0, d = FULL_DB[curB];
         let html = "";
-
         if(activeTab === 'NORM') {
             const ebv = yrs < 1 ? Math.round(kg * 80) : Math.round(kg * 70);
             const stk = Math.round(70+(yrs*2));
@@ -374,7 +477,7 @@
         } else if(activeTab === 'RES') {
             html = `<div class="section-header">KPR (ERC 2025)</div>
                 ${rowHtml("Defibrilace (4 J/kg)", (kg*4).toFixed(0), "J")}
-                ${rowHtml("Adrenalin (10 µg/kg)", (kg*0.1).toFixed(1), "ml", "1:10 000 (i.v./i.o.) - 9ml NaCl + 1ml ADR = 0,1mg/ml")}
+                ${rowHtml("Adrenalin (10 µg/kg)", (kg*0.1).toFixed(2), "ml", "1:10 000 (i.v./i.o.) - 9ml NaCl + 1ml ADR = 0,1mg/ml")}
                 ${rowHtml("Amiodaron (5 mg/kg)", (kg*5).toFixed(0), "mg", "Po 3. a 5. výboji")}
                 ${rowHtml("Atropin (20 µg/kg)", (kg*0.02).toFixed(2), "mg", "Bradykardie")}
                 ${rowHtml("Bolus tekutin", (kg*20).toFixed(0), "ml", "Krystaloid (20ml/kg)")}
@@ -382,45 +485,35 @@
         } else {
             const title = activeTab === 'ANE' ? "Anestezie" : "Akutní stavy";
             html = `<div class="section-header">${title}</div>`;
-            
-            // Filtrování a ABECEDNÍ ŘAZENÍ
             const filteredDrugs = DRUGS.filter(dr => Array.isArray(dr.tab) ? dr.tab.includes(activeTab) : dr.tab === activeTab)
                                        .sort((a, b) => a.name.localeCompare(b.name, 'cs'));
-
             filteredDrugs.forEach((dr, index) => {
                 const uid = dr.id || `drug_${index}`; 
                 const isOpen = expandedIds.has(uid);
-                
                 if (dr.variants) {
                     html += rowHtml(dr.name, "...", "", dr.sub, `toggleVariants('${uid}')`, isOpen);
                     html += `<div class="variant-container ${isOpen ? 'open' : ''}">`;
                     dr.variants.forEach(v => {
-                        let finalVal;
-                        let unit = "mg";
-                        
-                        // BARVY PRO SEKCE
+                        let finalVal; let unit = "mg";
                         let bgStyle = "";
                         if (v.l.includes("i.v.")) bgStyle = "background-color: rgba(255, 59, 48, 0.08);";
                         else if (v.l.includes("i.m.")) bgStyle = "background-color: rgba(175, 82, 222, 0.12);";
                         else if (v.l.includes("p.r.")) bgStyle = "background-color: rgba(139, 69, 19, 0.1);";
                         else if (v.l.includes("i.n.")) bgStyle = "background-color: rgba(76, 217, 100, 0.12);";
-
                         if (v.dMax) {
-                            let low = kg * v.d;
-                            let high = kg * v.dMax;
+                            let low = kg * v.d; let high = kg * v.dMax;
                             if (low < 0.1 && low > 0) { low *= 1000; high *= 1000; unit = "µg"; }
-                            finalVal = `${low.toFixed(low < 10 ? 1 : 0)}–${high.toFixed(high < 10 ? 1 : 0)}`;
+                            finalVal = `${low.toFixed(low < 10 ? 2 : 0)}–${high.toFixed(high < 10 ? 2 : 0)}`;
                         } else {
                             let res = (kg * v.d);
                             if (res < 0.1 && res > 0) { res = res * 1000; unit = "µg"; }
-                            finalVal = res.toFixed(res < 10 ? 1 : 0);
+                            finalVal = res.toFixed(res < 10 ? 2 : 0);
                         }
                         html += `<div class="variant-row" style="${bgStyle} margin: 0 -20px; padding: 10px 20px;"><span class="variant-info">${v.l}</span><span class="variant-val">${finalVal} ${unit}</span></div>`;
                     });
                     html += `</div>`;
                 } else {
-                    let res = (kg * dr.dose);
-                    let unit = dr.unit;
+                    let res = (kg * dr.dose); let unit = dr.unit;
                     if (res < 0.1 && res > 0 && unit === "mg") { res = res * 1000; unit = "µg"; }
                     const total = res.toFixed(res < 1 ? 2 : (res < 10 ? 1 : 0));
                     html += rowHtml(dr.name, total, unit, dr.sub);
@@ -429,11 +522,120 @@
         }
         view.innerHTML = html;
     }
+
+    function openCalc() {
+        toggleMenu(); 
+        document.getElementById('tool-modal').classList.add('active'); 
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('modal-content').innerHTML = `
+            <h3 style="margin-top:0">💉 Kalkulačka ředění</h3>
+            <div class="search-container">
+                <input type="text" id="calc-search-input" placeholder="🔍 Hledej lék (např. Torecan)..." oninput="filterDrugList(this.value)">
+                <span id="search-clear" class="search-clear" onclick="clearCalcSearch()">×</span>
+                <div class="drug-list-scroll" id="drug-scroll-list"></div>
+            </div>
+            <div class="calc-grid">
+                <div class="calc-field"><label class="calc-label">Obsah ampule</label><div class="calc-input-row"><input type="number" inputmode="decimal" id="ca-amt" class="calc-in" value="1" oninput="doCalc()"><select id="ca-u" class="calc-sel" onchange="doCalc()"><option>mg</option><option>mcg</option></select></div></div>
+                <div class="calc-field"><label class="calc-label">Objem ampule (ml)</label><div class="switch-container" id="amp-switches">${[1,2,5,10,20].map(v => `<button class="switch-btn" onclick="setAmpV(this, ${v})">${v} ml</button>`).join('')}<button class="switch-btn" onclick="setAmpV(this, null)">Vlastní</button></div><input type="number" id="ca-ampv" class="calc-in" style="display:none" placeholder="ml" oninput="doCalc()"></div>
+                <div class="calc-field"><label class="calc-label">Celkový objem (ml)</label><input type="number" id="ca-v" class="calc-in" value="10" oninput="doCalc()"></div>
+                <div class="calc-field"><label class="calc-label">Dávka pro pacienta</label><div class="calc-input-row"><input type="number" step="any" inputmode="decimal" id="ca-t" class="calc-in" value="0" oninput="doCalc()"><select id="ca-tu" class="calc-sel" onchange="doCalc()"><option>mg</option><option>mcg</option></select></div></div>
+            </div>
+            <div id="ca-res" class="res-pill">Zvol lék nebo zadej hodnoty</div>`;
+        filterDrugList("");
+        setAmpV(document.querySelector('.switch-btn'), 1);
+    }
+
+    function filterDrugList(q) {
+        const list = document.getElementById('drug-scroll-list');
+        const clearBtn = document.getElementById('search-clear');
+        const query = q.toLowerCase();
+        
+        if (clearBtn) clearBtn.style.display = q.length > 0 ? 'block' : 'none';
+        
+        list.innerHTML = CALC_DB
+            .filter(d => d.n.toLowerCase().includes(query))
+            .map((d, i) => `<div class="drug-option" onclick="applyPresetByIndex('${d.n}')">${d.n}</div>`)
+            .join('');
+    }
+
+    function clearCalcSearch() {
+        const input = document.getElementById('calc-search-input');
+        input.value = '';
+        filterDrugList('');
+        input.focus();
+    }
+
+    function applyPresetByIndex(name) {
+        const idx = CALC_DB.findIndex(d => d.n === name);
+        if(idx === -1) return;
+        const drug = CALC_DB[idx];
+        const kg = parseFloat(document.getElementById('in-kg').value)||3;
+        const yrs = parseInt(document.getElementById('in-yr').value)||0;
+        const totalMos = (yrs * 12) + (parseInt(document.getElementById('in-mo').value)||0);
+
+        document.getElementById('calc-search-input').value = drug.n;
+        document.getElementById('search-clear').style.display = 'block';
+        document.getElementById('ca-amt').value = drug.amp; 
+        document.getElementById('ca-u').value = drug.u.includes('mcg') ? 'mcg' : 'mg';
+        
+        const buttons = document.querySelectorAll('#amp-switches .switch-btn'); let found = false;
+        buttons.forEach(b => { if(b.innerText === drug.ampV + " ml") { setAmpV(b, drug.ampV); found = true; } });
+        if(!found) { setAmpV(buttons[buttons.length-1], null); document.getElementById('ca-ampv').value = drug.ampV; }
+        
+        document.getElementById('ca-t').value = (drug.d * kg).toFixed(drug.d*kg < 1 ? 2 : 1); 
+        document.getElementById('ca-tu').value = drug.u.includes('mcg') ? 'mcg' : 'mg'; 
+        
+        const resBox = document.getElementById('ca-res');
+        resBox.dataset.sol = drug.sol;
+        
+        let warning = "";
+        if(drug.limit) {
+            if(drug.limit.minY && yrs < drug.limit.minY) warning = drug.limit.msg;
+            else if(drug.limit.minM && totalMos < drug.limit.minM) warning = drug.limit.msg;
+            else if(drug.limit.minKg && kg < drug.limit.minKg) warning = drug.limit.msg;
+        }
+        resBox.dataset.warning = warning;
+        doCalc();
+    }
+
+    function setAmpV(btn, val) {
+        document.querySelectorAll('#amp-switches .switch-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active'); const input = document.getElementById('ca-ampv');
+        if (val === null) { input.style.display = 'block'; input.value = ""; } else { input.style.display = 'none'; input.value = val; }
+        doCalc();
+    }
+
+    function doCalc() {
+        const amt = parseFloat(document.getElementById('ca-amt').value)||0, ampV = parseFloat(document.getElementById('ca-ampv').value)||0.0001, totalV = parseFloat(document.getElementById('ca-v').value)||0.0001;
+        const unit = document.getElementById('ca-u').value, target = parseFloat(document.getElementById('ca-t').value)||0, tunit = document.getElementById('ca-tu').value;
+        const resBox = document.getElementById('ca-res');
+        const sol = resBox.dataset.sol || "NaCl / Aqua";
+        const warn = resBox.dataset.warning || "";
+        
+        const finalConc = amt / totalV;
+        let targetInBase = (tunit === unit) ? target : (tunit === 'mg' ? target * 1000 : target / 1000);
+        const applyMl = targetInBase / finalConc;
+        
+        let concStr = unit === 'mg' ? `${finalConc.toFixed(2)} mg/ml` : `${finalConc.toFixed(1)} µg/ml`;
+        if (unit === 'mg' && finalConc < 0.1) concStr = `${(finalConc * 1000).toFixed(1)} µg/ml`;
+        
+        if (warn) resBox.classList.add('warning'); else resBox.classList.remove('warning');
+
+        resBox.innerHTML = `
+            ${warn ? `<span class="warning-text">⚠️ ${warn}</span>` : ''}
+            <div style="font-size:0.85rem"><b>Příprava:</b> ${ampV} ml léku + ${(totalV-ampV).toFixed(1)} ml rozp.</div>
+            <div class="solvent-badge">💧 ${sol}</div>
+            <div class="res-divider"></div>
+            <div style="text-align:center">
+                <span style="font-size:0.8rem; opacity:0.8">KONCENTRACE: ${concStr}</span>
+                <span class="res-highlight">${isFinite(applyMl)?applyMl.toFixed(2):'0.00'} ml</span>
+                <span style="font-size:0.8rem; font-weight:800">DÁVKA PRO PACIENTA</span>
+            </div>`;
+    }
     
-    // Nástroje (JumpSTART, GCS, Apgar)
     const jSteps = { walk: { q: "Může dítě chodit?", btns: [{l:"Ano", s:"result-green"}, {l:"Ne", s:"breath"}] }, breath: { q: "Dýchá dítě?", btns: [{l:"Ano", s:"rate"}, {l:"Ne", s:"airway"}] }, airway: { q: "Po uvolnění cest dýchá?", btns: [{l:"Ano", s:"result-red"}, {l:"Ne", s:"pulse"}] }, pulse: { q: "Má hmatný puls?", btns: [{l:"Ano", s:"rescue"}, {l:"Ne", s:"result-black"}] }, rescue: { q: "Dýchá po 5 vdeších?", btns: [{l:"Ano", s:"result-red"}, {l:"Ne", s:"result-black"}] }, rate: { q: "Dechová frekvence?", btns: [{l:"< 15 nebo > 45", s:"result-red"}, {l:"15 - 45 /min", s:"pulseCheck"}] }, pulseCheck: { q: "Hmatný puls?", btns: [{l:"Ne", s:"result-red"}, {l:"Ano", s:"avpu"}] }, avpu: { q: "Reakce (AVPU)?", btns: [{l:"P nebo U", s:"result-red"}, {l:"A nebo V", s:"result-yellow"}] } };
     function startJumpstart() { toggleMenu(); document.getElementById('tool-modal').classList.add('active'); document.getElementById('overlay').style.display = 'block'; showJumpStep('walk'); }
-    function showJumpStep(id) { const content = document.getElementById('modal-content'); if(id.startsWith('result')) { const color = id.split('-')[1]; const labels = { green: 'LEHKÉ', red: 'KRITICKÉ', black: 'MRTVÉ', yellow: 'NALÉHAVÉ' }; content.innerHTML = `<div class="triage-step-title">Výsledek triáže</div><div class="result-box" style="background:var(--triage-${color})">${labels[color]}</div><button class="btn-triage btn-full" style="margin-top:20px; background:var(--primary); color:white; border:none;" onclick="startJumpstart()">NOVÝ PACIENT</button>`; return; } const step = jSteps[id]; let btns = step.btns.map(b => `<button class="btn-triage" onclick="showJumpStep('${b.s}')">${b.l}</button>`).join(''); content.innerHTML = `<div class="triage-step-title">${step.q}</div><div class="triage-btns">${btns}</div>`; }
+    function showJumpStep(id) { const content = document.getElementById('modal-content'); if(id.startsWith('result')) { const color = id.split('-')[1]; const labels = { green: 'NEZÁVAŽNÝ STAV', red: 'KRITICKÝ STAV', black: 'MRTVÉ - P4', yellow: 'URGENTNÍ STAV' }; content.innerHTML = `<div class="triage-step-title">Výsledek triáže</div><div class="result-box" style="background:var(--triage-${color})">${labels[color]}</div><button class="btn-triage btn-full" style="margin-top:20px; background:var(--primary); color:white; border:none;" onclick="startJumpstart()">NOVÝ PACIENT</button>`; return; } const step = jSteps[id]; let btns = step.btns.map(b => `<button class="btn-triage" onclick="showJumpStep('${b.s}')">${b.l}</button>`).join(''); content.innerHTML = `<div class="triage-step-title">${step.q}</div><div class="triage-btns">${btns}</div>`; }
     function openGCS() { toggleMenu(); document.getElementById('tool-modal').classList.add('active'); document.getElementById('overlay').style.display = 'block'; document.getElementById('modal-content').innerHTML = `<div class="triage-step-title">Glasgow Coma Scale</div><div class="score-row"><span class="score-label">Oči</span><select id="ge" class="score-select" onchange="cGCS()"><option value="4">4 - Spontánně</option><option value="3">3 - Na slovo</option><option value="2">2 - Na bolest</option><option value="1">1 - Nic</option></select></div><div class="score-row"><span class="score-label">Řeč</span><select id="gv" class="score-select" onchange="cGCS()"><option value="5">5 - Žvatlá, usmívá se</option><option value="4">4 - Pláč / Utišitelný</option><option value="3">3 - Křik / Neutišitelný</option><option value="2">2 - Sténání</option><option value="1">1 - Nic</option></select></div><div class="score-row"><span class="score-label">Pohyb</span><select id="gm" class="score-select" onchange="cGCS()"><option value="6">6 - Spontánní</option><option value="5">5 - Lokalizuje</option><option value="4">4 - Únik</option><option value="3">3 - Flexe</option><option value="2">2 - Extenze</option><option value="1">1 - Nic</option></select></div><div id="gr" class="result-box" style="background:var(--triage-green)">15 BODŮ <span class="result-label">NORMA</span></div>`; }
     function cGCS() { const s = parseInt(document.getElementById('ge').value) + parseInt(document.getElementById('gv').value) + parseInt(document.getElementById('gm').value); let c, txt; if(s < 9) { c="var(--triage-red)"; txt="TĚŽKÁ PORUCHA (KÓMA)"; } else if(s < 13) { c="var(--triage-yellow)"; txt="STŘEDNÍ PORUCHA"; } else { c="var(--triage-green)"; txt="NORMA / LEHKÁ PORUCHA"; } const r = document.getElementById('gr'); r.innerHTML = `${s} BODŮ <span class="result-label">${txt}</span>`; r.style.background = c; }
     function openApgar() { toggleMenu(); document.getElementById('tool-modal').classList.add('active'); document.getElementById('overlay').style.display = 'block'; document.getElementById('modal-content').innerHTML = `<div class="triage-step-title">Apgar skóre</div><div class="score-row"><span class="score-label">Akce srdeční</span><select class="as score-select" onchange="cAP()"><option value="2">> 100/min</option><option value="1">< 100/min</option><option value="0">Zástava</option></select></div><div class="score-row"><span class="score-label">Dýchání</span><select class="as score-select" onchange="cAP()"><option value="2">Pravidelné / Křik</option><option value="1">Nepravidelné / Lapavé</option><option value="0">Apnoe</option></select></div><div class="score-row"><span class="score-label">Reakce na odsávání</span><select class="as score-select" onchange="cAP()"><option value="2">Kašel, kýchání, křik</option><option value="1">Grimasy</option><option value="0">Bez reakce</option></select></div><div class="score-row"><span class="score-label">Svalový tonus</span><select class="as score-select" onchange="cAP()"><option value="2">Aktivní pohyb</option><option value="1">Mírná flexe končetin</option><option value="0">Chabý</option></select></div><div class="score-row"><span class="score-label">Barva kůže</span><select class="as score-select" onchange="cAP()"><option value="2">Růžová</option><option value="1">Akrocyanóza</option><option value="0">Bledá / Modrá</option></select></div><div id="ar" class="result-box" style="background:var(--triage-green)">10 BODŮ <span class="result-label">FYZIOLOGICKÝ NOVOROZENEC</span></div>`; }
