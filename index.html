@@ -45,6 +45,63 @@
             --zebra: rgba(255, 255, 255, 0.05);
         }
 
+        /* --- INTRO ANIMACE --- */
+        #intro-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.6s ease-out, visibility 0.6s;
+        }
+        .intro-stripes {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: row;
+        }
+        .intro-stripe {
+            flex: 1; height: 100%;
+            transform: translateY(110%);
+            animation: swipeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        /* 9 barev Broslow pásku — zleva doprava */
+        .intro-stripe:nth-child(1) { background: #808080; animation-delay: 0.05s; }
+        .intro-stripe:nth-child(2) { background: #FFC0CB; animation-delay: 0.12s; }
+        .intro-stripe:nth-child(3) { background: #FF3B30; animation-delay: 0.19s; }
+        .intro-stripe:nth-child(4) { background: #af52de; animation-delay: 0.26s; }
+        .intro-stripe:nth-child(5) { background: #FFCC00; animation-delay: 0.33s; }
+        .intro-stripe:nth-child(6) { background: #e8e8e8; animation-delay: 0.40s; }
+        .intro-stripe:nth-child(7) { background: #007AFF; animation-delay: 0.47s; }
+        .intro-stripe:nth-child(8) { background: #FF9500; animation-delay: 0.54s; }
+        .intro-stripe:nth-child(9) { background: #4CD964; animation-delay: 0.61s; }
+
+        @keyframes swipeUp {
+            from { transform: translateY(110%); }
+            to   { transform: translateY(0%); }
+        }
+
+        .intro-logo {
+            position: relative; z-index: 2;
+            color: white; font-size: 3.8rem; font-weight: 900; letter-spacing: -2px;
+            text-shadow: 0 2px 30px rgba(0,0,0,0.7), 0 0 80px rgba(0,0,0,0.5);
+            opacity: 0; transform: scale(0.85);
+            animation: popLogo 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.95s forwards;
+        }
+        .intro-logo sup { font-size: 0.4em; vertical-align: super; opacity: 0.8; letter-spacing: 0; }
+        .intro-brand {
+            position: relative; z-index: 2;
+            color: rgba(255,255,255,0.5); font-size: 0.75rem; font-weight: 500;
+            letter-spacing: 0.12em; text-align: center; margin-top: 4px;
+            opacity: 0;
+            animation: fadeInBrand 0.5s ease-out 1.25s forwards;
+        }
+
+        @keyframes popLogo {
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes fadeInBrand {
+            to { opacity: 1; }
+        }
+
+        .intro-hidden { opacity: 0; visibility: hidden; }
+
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
@@ -53,21 +110,15 @@
             color: var(--text-main);
             margin: 0;
             height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            display: flex; flex-direction: column; overflow: hidden;
             transition: background-color 0.3s ease;
             padding-top: var(--safe-top);
         }
 
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 20px;
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-            z-index: 100;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 20px; background: var(--surface);
+            border-bottom: 1px solid var(--border); z-index: 100;
         }
 
         .app-title { font-weight: 900; font-size: 1.4rem; letter-spacing: -0.8px; }
@@ -96,7 +147,6 @@
         }
         .modal.active { display: block; }
 
-        /* OPRAVENÝ GRID DO PŮVODNÍHO STAVU (2 SLOUPCE) */
         .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         .calc-field { display: flex; flex-direction: column; gap: 5px; }
         .calc-label { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
@@ -198,6 +248,25 @@
 </head>
 <body>
 
+    <!-- INTRO LAYER -->
+    <div id="intro-layer">
+        <div class="intro-stripes">
+            <div class="intro-stripe"></div>
+            <div class="intro-stripe"></div>
+            <div class="intro-stripe"></div>
+            <div class="intro-stripe"></div>
+            <div class="intro-stripe"></div>
+            <div class="intro-stripe"></div>
+            <div class="intro-stripe"></div>
+            <div class="intro-stripe"></div>
+            <div class="intro-stripe"></div>
+        </div>
+        <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;">
+            <div class="intro-logo">ResqPedi<sup>®</sup></div>
+            <div class="intro-brand">made by Švampi</div>
+        </div>
+    </div>
+
     <div class="drawer-overlay" id="overlay" onclick="closeAll()"></div>
     
     <div class="drawer" id="drawer">
@@ -255,6 +324,15 @@
     </div>
 
 <script>
+    // SCRIPT PRO ODSTRANĚNÍ INTRA
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            const intro = document.getElementById('intro-layer');
+            intro.classList.add('intro-hidden');
+            setTimeout(() => intro.remove(), 600);
+        }, 2200);
+    });
+
     const FULL_DB = {
         "GREY":   { etk: "3.0", depth: "9", suction: "6 (světle zelená)", opa: "00 (růž.)", lma: "1", blade: "0 (Miller)", cannula: "24G (žlutá)", io: "15mm (růžová)" },
         "PINK":   { etk: "3.5", depth: "10", suction: "8 (modrá)", opa: "0 (čer.)", lma: "1", blade: "0-1 (Miller)", cannula: "24G (žlutá)", io: "15mm (růžová)" },
@@ -328,7 +406,7 @@
         {n: "Cordarone", d: 5, u: "mg/kg", amp: 150, ampV: 3, sol: "G5% (VÝHRADNĚ!)", limit: {minKg: 3, msg: "Pozor na benzylalkohol u novorozenců!"}},
         {n: "Dexamed", d: 0.6, u: "mg/kg", amp: 8, ampV: 2, sol: "NaCl / G5%"},
         {n: "Dexamethason supp.", d: 1, u: "čípek", amp: 1, ampV: 1, sol: "p.r."},
-        {n: "Diazepam Rectal Tube", d: 0.5, u: "mg/kg", amp: 5, ampV: 2.5, sol: "p.r.", limit: {minKg: 10, msg: "Tuba 5mg je určena pro děti nad 10kg."}},
+        {n: "Diazepam Rectal Tube", d: 0.5, u: "mg/kg", amp: 5, ampV: 2.5, sol: "p.r.", limit: {minKg: 10, msg: "Tuba 5mg je určena pro dětí nad 10kg."}},
         {n: "Dithiaden", d: 0.05, u: "mg/kg", amp: 1, ampV: 1, sol: "NaCl", limit: {minY: 1, msg: "SPC: Kontraindikováno do 1 roku věku."}},
         {n: "Dolmina", d: 1, u: "mg/kg", amp: 75, ampV: 3, sol: "NaCl (i.m. / i.v. infuze)", limit: {minY: 15, msg: "SPC: i.m. podání až od 15 let. (Pediatrie: Off-label)"}},
         {n: "Ebrantil", d: 0.5, u: "mg/kg", amp: 25, ampV: 5, sol: "NaCl"},
@@ -541,29 +619,18 @@
         const list = document.getElementById('drug-scroll-list');
         const clearBtn = document.getElementById('search-clear');
         const query = q.toLowerCase();
-        
         if (clearBtn) clearBtn.style.display = q.length > 0 ? 'block' : 'none';
-        
-        if (q.length === 0) {
-            list.style.display = 'none';
-            list.innerHTML = "";
-            return;
-        }
-
+        if (q.length === 0) { list.style.display = 'none'; list.innerHTML = ""; return; }
         const filtered = CALC_DB.filter(d => d.n.toLowerCase().includes(query));
         if (filtered.length > 0) {
             list.style.display = 'block';
             list.innerHTML = filtered.map(d => `<div style="padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 0.95rem; cursor: pointer; font-weight: 600; color: var(--text-main);" onclick="applyPresetByIndex('${d.n}')">${d.n}</div>`).join('');
-        } else {
-            list.style.display = 'none';
-        }
+        } else { list.style.display = 'none'; }
     }
 
     function clearCalcSearch() {
         const input = document.getElementById('calc-search-input');
-        input.value = '';
-        filterDrugList('');
-        input.focus();
+        input.value = ''; filterDrugList(''); input.focus();
     }
 
     function applyPresetByIndex(name) {
@@ -574,24 +641,18 @@
         const yrs = parseInt(document.getElementById('in-yr').value)||0;
         const mos = parseInt(document.getElementById('in-mo').value)||0;
         const totalMos = (yrs * 12) + mos;
-
         document.getElementById('calc-search-input').value = drug.n;
-        document.getElementById('drug-scroll-list').style.display = 'none'; // Zavře seznam
+        document.getElementById('drug-scroll-list').style.display = 'none';
         document.getElementById('search-clear').style.display = 'block';
-
         document.getElementById('ca-amt').value = drug.amp; 
         document.getElementById('ca-u').value = drug.u.includes('mcg') ? 'mcg' : 'mg';
-        
         const buttons = document.querySelectorAll('#amp-switches .switch-btn'); let found = false;
         buttons.forEach(b => { if(b.innerText === drug.ampV + " ml") { setAmpV(b, drug.ampV); found = true; } });
         if(!found) { setAmpV(buttons[buttons.length-1], null); document.getElementById('ca-ampv').value = drug.ampV; }
-        
         document.getElementById('ca-t').value = (drug.d * kg).toFixed(drug.d*kg < 1 ? 2 : 1); 
         document.getElementById('ca-tu').value = drug.u.includes('mcg') ? 'mcg' : 'mg'; 
-        
         const resBox = document.getElementById('ca-res');
         resBox.dataset.sol = drug.sol;
-        
         let warning = "";
         if(drug.limit) {
             if(drug.limit.minY && yrs < drug.limit.minY) warning = drug.limit.msg;
@@ -599,7 +660,6 @@
             if(drug.limit.minM && totalMos < drug.limit.minM) warning = drug.limit.msg;
         }
         resBox.dataset.warning = warning;
-        
         doCalc();
     }
 
@@ -617,16 +677,12 @@
         const resBox = document.getElementById('ca-res');
         const sol = resBox.dataset.sol || "NaCl / Aqua";
         const warn = resBox.dataset.warning || "";
-        
         const finalConc = amt / totalV;
         let targetInBase = (tunit === unit) ? target : (tunit === 'mg' ? target * 1000 : target / 1000);
         const applyMl = targetInBase / finalConc;
-        
         let concStr = unit === 'mg' ? `${finalConc.toFixed(2)} mg/ml` : `${finalConc.toFixed(1)} µg/ml`;
         if (unit === 'mg' && finalConc < 0.1) concStr = `${(finalConc * 1000).toFixed(1)} µg/ml`;
-        
         if (warn) resBox.classList.add('warning'); else resBox.classList.remove('warning');
-
         resBox.innerHTML = `
             ${warn ? `<span class="warning-text">⚠️ ${warn}</span>` : ''}
             <div style="font-size:0.85rem"><b>Příprava:</b> ${ampV} ml léku + ${(totalV-ampV).toFixed(1)} ml rozp.</div>
